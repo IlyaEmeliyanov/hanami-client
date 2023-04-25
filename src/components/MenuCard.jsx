@@ -10,21 +10,24 @@ import PlusIcon from '../images/icons/plus.svg'
 
 const MenuCard = ({dishData, addDish}) => {
     const MAX_COUNT = 5; 
-    let [counter, setCounter] = useState(0);
+    let [counter, setCounter] = useState(dishData.quantity);
     function addNew () {
       if (counter === 0){
-        addDish(dishData._id, counter+1, dishData.price, dishData.dish, 0);
+        addDish(dishData._id, counter+1, dishData.price, dishData.dish,dishData.title, 0);
+      }
+      else if(counter === 5){
       }
       else{
-        addDish(dishData._id, counter+1, dishData.price, dishData.dish, 1);
+        addDish(dishData._id, counter+1, dishData.price, dishData.dish,dishData.title, 1);
       }
     }
     function subNew(){
+      
       if (counter !== 0){
-        addDish(dishData._id, counter-1, dishData.price, dishData.dish, -1);
+        addDish(dishData._id, counter-1, dishData.price, dishData.dish,dishData.title, -1);
       }
       else{
-        addDish(dishData._id, counter-1, dishData.price, dishData.dish, -2);
+        addDish(dishData._id, counter, dishData.price, dishData.dish, dishData.title,-2);
       }
     }
 
@@ -54,7 +57,7 @@ const MenuCard = ({dishData, addDish}) => {
           <p className="text-active underline">ALLERGIE</p>
           <p className="font-bold">{dishData.price} €</p>
           <div className="flex justify-between items-center gap-[1rem]">
-            <button onClick={() => setCounter(counter === 0 ? 0 : --counter)}>
+            <button onClick={() => setCounter(counter === 0 ? 0 : --counter)}>      
               <img src={MinusIcon} alt="minus-icon" onClick={subNew}/>
             </button>
             <p className="w-[1rem]">{counter}</p>

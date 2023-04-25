@@ -1,9 +1,11 @@
 // Importing libraries
 import React, { useState, Components, useEffect } from "react";
+import {Link, useLocation} from "react-router-dom";
 
 // Importing components
 import Spacer from "../components/common/Spacer";
 import MenuCard from "../components/MenuCard";
+
 // Importing images
 import LogoWhite from "../images/logo-white.svg";
 
@@ -11,10 +13,20 @@ import LogoWhite from "../images/logo-white.svg";
 import ShoppingCartIcon from "../images/icons/shopping-cart.svg";
 import SearchIcon from "../images/icons/search.svg";
 
+
 const Home = () => {
-  const [dishes, setDishes] = useState ([]);
-  const [nigiri, setNigiri] = useState ([]);
+
+  const location = useLocation();
+  const shopping = location.state;
+
+  const sections = ["degustazione", "nigiri", "zuppe", "insalate", "gyoza", "primi", "riso", "teppanyaki", "frittura", "tartare & sashimi", "temaki", "gio", "gunkan", "onigiri"
+  ,"hosomaki", "tataki", "uramaki" , "special roll", "futomaki", "maki fritto", "bowl", "sushi misto", "cena"];
+
+  const [curSection, setSection] = useState(sections[0]);
+  const [menu, setMenu] = useState ([]);
+  const [filteredMenu, setFilteredMenu] = useState ([]);
   const [degustazione, setDegustazione] = useState ([]);
+
   useEffect (() => {
     return (async () => {
       let dishData;
@@ -24,24 +36,49 @@ const Home = () => {
       } catch (error) {
         dishData = [];
       }
+      setMenu(dishData);
+      console.log(shopping);
+      if (shopping && (shopping).length != 0){
+        const shopping = location.state;
+        const mappedMenu = dishData.map(dish =>{
+          const matchingDish = shopping.find(dish2 => dish2._id === dish._id.$oid || dish2._id.$oid === dish._id.$oid);
+          if (matchingDish){
+            return {...dish, quantity: matchingDish.qty};
+          }
+          return dish;
+        });
+        console.log(mappedMenu);
 
-      setDishes(dishData);
-      const nigiri = dishData.filter(nigiri =>nigiri.dish>76 && nigiri.dish < 88);
-      setNigiri(nigiri);
-      const degustazione = dishData.filter(degustazione => degustazione.dish<5);
-      setDegustazione (degustazione);
+        const filteredMenu = mappedMenu.filter(nigiri =>nigiri.dish>76 && nigiri.dish < 88);
+        setFilteredMenu(filteredMenu);
+        const degustazione = mappedMenu.filter(degustazione => degustazione.dish<5);
+        setDegustazione (degustazione);
+      }
+      else{
+        const mappedMenu = dishData;
+        const filteredMenu = mappedMenu.filter(nigiri =>nigiri.dish>76 && nigiri.dish < 88);
+        setFilteredMenu(filteredMenu);
+        const degustazione = mappedMenu.filter(degustazione => degustazione.dish<5);
+        setDegustazione (degustazione);
+      }
+
+      
     });
   }, []);
+  //implementazione del filtro per categoria
+  useEffect(()=>{
+  }, [curSection])
 
   //shopping cart state
-  const [shoppingState, setShoppingState] = useState([]);
-  function addDish(id, qty, price, dish, flag) {
+  const [shoppingState, setShoppingState] = useState(shopping??[]);
+  function addDish(id, qty, price, dish, title, flag) {
     if ( flag === 0 ){
       const item = {
         "_id": id,
         "qty": qty,
         "price": price,
-        "dish": dish
+        "dish": dish,
+        "title": title
       }
       setShoppingState([...shoppingState, item]);
     }
@@ -49,8 +86,9 @@ const Home = () => {
       const item ={
         "_id": id,
         "qty": qty,
-        "price": price *(qty),
-        "dish": dish
+        "price": price,
+        "dish": dish,
+        "title": title
       }
       const newObj = shoppingState.map(ogg =>{
         if (ogg._id === item._id){
@@ -64,8 +102,9 @@ const Home = () => {
       const item = {
         "_id": id,
         "qty": qty,
-        "price": price *(qty),
-        "dish": dish
+        "price": price,
+        "dish": dish,
+        "title": title
       }
       const newObj = shoppingState.map(ogg =>{
         if (ogg._id === item._id){
@@ -76,16 +115,17 @@ const Home = () => {
       setShoppingState(newObj);
     }
 
-    else {
+    else {  
       const updatedItems = shoppingState.filter(item => item._id !== id);
       setShoppingState(updatedItems)
     }
   }
 
+  //calcolo del totale dei piatti e numero
   const total =shoppingState.reduce((acc, item)=> acc + item.price, 0);
   const plates = shoppingState.reduce((acc, item)=> acc + item.qty, 0);
   
-
+  
   const getLabel = (seconds) =>
     `${Math.floor(seconds / 60)
       .toString()
@@ -106,62 +146,14 @@ const Home = () => {
     }
   }, 1000);
 
-  const sections = ["degustazione", "nigiri", "zuppe", "insalate", "gyoza", "primi", "riso", "teppanyaki", "frittura", "tartare & sashimi", "temaki", "gio", "gunkan", "onigiri"
-  ,"hosomaki", "tataki", "uramaki" , "special roll", "futomaki", "maki fritto", "bowl", "sushi misto", "cena"];
-
-  const [curSection, setSection] = useState(sections[0]);
+  //questa parte va eliminata quando si implementa filteredMenu
   let selected = [];
-  //oppure faccio uno switch case 
+  
   if (curSection === "nigiri") {
-    selected = nigiri;
+    selected = filteredMenu;
   } else if (curSection === "degustazione") {
     selected = degustazione;
-  }/* else if (curSection === "antipasti") {
-    selected = antipasti;
-  } else if (curSection === "zuppe") {
-    selected = zuppe;
-  } else if (curSection === "insalate") {
-    selected = insalate;
-  } else if (curSection === "gyoza") {
-    selected = gyoza;
-  } else if (curSection === "primi") {
-    selected = primi;
-  } else if (curSection === "riso") {
-    selected = riso;
-  } else if (curSection === "teppanyaki") {
-    selected = teppanyaki;
-  } else if (curSection === "frittura") {
-    selected = degustazione;
-  } else if (curSection === "tartare & sashimi") {
-    selected = tartare;
-  } else if (curSection === "temaki") {
-    selected = temaki;
-  } else if (curSection === "gio") {
-    selected = gio;
-  } else if (curSection === "gunkan") {
-    selected = gunkan;
-  } else if (curSection === "onigiri") {
-    selected = onigiri;
-  } else if (curSection === "hosomaki") {
-    selected = hosomaki;
-  } else if (curSection === "tataki") {
-    selected = tataki;
-  } else if (curSection === "uramaki") {
-    selected = uramaki;
-  } else if (curSection === "special roll") {
-    selected = special;
-  } else if (curSection === "futomaki") {
-    selected = futomaki;
-  } else if (curSection === "maki fritto") {
-    selected = maki;
-  } else if (curSection === "bowl") {
-    selected = bowl;
-  } else if (curSection === "sushi misto") {
-    selected = misto;
-  } else if (curSection === "cena") {
-    selected = cena;
-  }*/
-
+  } 
   return (
     <section>
       <header className="header">
@@ -184,14 +176,12 @@ const Home = () => {
       <div className="">
         <ul className="flex overflow-x-scroll p-4">
             {sections.map(section => 
-                <li key={section} onClick={() => setSection(section)} className="px-[1.5rem] py-[10px]">
+                <li key={section} onClick={() => setSection(section)} className="px-[0.7rem] py-[10px]">
                     <p className={`font-semibold text-${section === curSection ? "active" : "fontSecondary"}`}>{section.toUpperCase()}</p>
                 </li>
             )}
         </ul>
       </div>
-
-      <Spacer height="2rem"/>
         
         <ul className="overflow-y-scroll z-0">
            
@@ -203,11 +193,12 @@ const Home = () => {
             } 
           
         </ul>
-
-      <button className="fixed w-full h-[5rem] left-[50%] bottom-0 -translate-x-[50%] px-auto py-[0.5rem] text-[#000] uppercase font-medium rounded-full gradient z-10" onClick={()=>{ console.log(shoppingState)}}>
-        <span className="text-[#000]">€ {total} ({plates}/5 piatti)</span>
-        <p className="text-[#000] uppercase font-semibold">procedi all'ordine</p>
-      </button>
+      <Link to= "/shopping-cart" state= {shoppingState}>
+        <button className="fixed w-full h-[5rem] left-[50%] bottom-0 -translate-x-[50%] px-auto py-[0.5rem] text-[#000] uppercase font-medium rounded-full gradient z-10">
+          <span className="text-[#000]">€ ({plates}/5 piatti)</span>
+          <p className="text-[#000] uppercase font-semibold">procedi all'ordine</p>
+        </button>
+      </Link>
     </section>
   );
 };
