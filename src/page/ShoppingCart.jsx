@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import {Link} from "react-router-dom";
 
+import InviaDati from "./Functions/InviaDati";
+
 import ShoppingCard from "../components/ShoppingCard";
 
 import LogoWhite from '../images/logo-white.svg';
@@ -49,7 +51,6 @@ const ShoppingCart = () => {
                 return ogg;
             })
             setShoppingState(newObj);
-            console.log(JSON.stringify(shoppingState));
         }
         else if(flag === -1){
             const item = {
@@ -73,6 +74,11 @@ const ShoppingCart = () => {
         const updatedItems = shoppingState.filter(item => item._id !== id);
         setShoppingState(updatedItems)
         }
+    }
+
+    const handleOrder = async() =>{
+        console.log(shoppingState);
+        const response = InviaDati("http://localhost:5500/order", shoppingState, 1);
     }
 
     const getLabel = (seconds) =>
@@ -124,15 +130,16 @@ const ShoppingCart = () => {
                         € {total}
                     </h4>
                 </div>
-                <div className="button gradient w-2/6 ">
-                    <h4 className="relative text-center mt-[1.2rem] font-semibold">
-                        ORDINA
-                    </h4>
+                <div className="button gradient w-2/6 " onClick={handleOrder}>
+                        <h4 className="relative text-center mt-[1.2rem] font-semibold">
+                            ORDINA
+                        </h4>
                 </div>
             </div>
         </section>
         
     );
 }
+
 
 export default ShoppingCart;

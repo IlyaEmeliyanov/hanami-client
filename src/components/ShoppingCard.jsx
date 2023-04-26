@@ -13,13 +13,11 @@ const ShoppingCard = ({cartData, addDish}) => {
     function addNew () {
         if (counter === 0){
           addDish(cartData._id.$oid, counter+1, cartData.price, cartData.dish, cartData.title, 0);
-          console.log("counter === 0")
         }
         else if(counter === 5){
         }
         else{
           addDish(cartData._id.$oid, counter+1, cartData.price, cartData.dish, cartData.title, 1);
-          console.log("counter === 1-5")
         }
       }
       function subNew(){
@@ -33,7 +31,6 @@ const ShoppingCard = ({cartData, addDish}) => {
         }
       }
 
-    console.log(cartData);
     return (
         <section className="pr-[1rem] pt-[0rem] pb-[0rem]">
             <div className="card h-[6rem] bg-[#222427] rounded-xl flex">
