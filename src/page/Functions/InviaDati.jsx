@@ -19,7 +19,7 @@ const SendData =(url, dati, ntable) =>{
             const response = await fetch(url,{
                 method: 'POST',
                 headers:{
-                    'Access-Control-Allow-Origin': '*',
+                    'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(data),
             });
@@ -32,7 +32,8 @@ const SendData =(url, dati, ntable) =>{
             console.error('Errore nella richiesta HTTP: ', error);
         }
     }
-    InviaDati();
+    console.log(data);
+    //InviaDati();
 }
 
 export default SendData;

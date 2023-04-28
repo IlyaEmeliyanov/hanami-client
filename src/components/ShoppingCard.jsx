@@ -9,25 +9,25 @@ import PlusIcon from '../images/icons/plus.svg'
 const ShoppingCard = ({cartData, addDish}) => {
     const MAX_COUNT = 5; 
     let [counter, setCounter] = useState (cartData.qty);
-
+    const id =cartData._id.$oid ? cartData._id.$oid :cartData._id;
     function addNew () {
         if (counter === 0){
-          addDish(cartData._id.$oid, counter+1, cartData.price, cartData.dish, cartData.title, 0);
+          addDish(id, counter+1, cartData.price, cartData.dish, cartData.title, 0);
         }
         else if(counter === 5){
         }
         else{
-          addDish(cartData._id.$oid, counter+1, cartData.price, cartData.dish, cartData.title, 1);
+          addDish(id, counter+1, cartData.price, cartData.dish, cartData.title, 1);
         }
       }
       function subNew(){
         
 
         if (counter !== 0){
-          addDish(cartData._id.$oid, counter-1, cartData.price, cartData.dish,cartData.title, -1);
+          addDish(id, counter-1, cartData.price, cartData.dish,cartData.title, -1);
         }
         else{
-          addDish(cartData._id.$oid, counter, cartData.price, cartData.dish, cartData.title,-2);
+          addDish(id, counter, cartData.price, cartData.dish, cartData.title,-2);
         }
       }
 

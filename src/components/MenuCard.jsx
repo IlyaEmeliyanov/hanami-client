@@ -1,5 +1,5 @@
 // Importing libraries
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 
 // Importing components
 import Spacer from "./common/Spacer";
@@ -10,24 +10,27 @@ import PlusIcon from '../images/icons/plus.svg'
 
 const MenuCard = ({dishData, addDish}) => {
     const MAX_COUNT = 5; 
-    let [counter, setCounter] = useState(dishData.quantity);
+    function handleQty(value){
+      if(dishData.quantity<=MAX_COUNT && dishData.quantity>=0)
+      dishData.quantity = value;
+    }
     function addNew () {
-      if (counter === 0){
-        addDish(dishData._id, counter+1, dishData.price, dishData.dish,dishData.title, 0);
+      if (dishData.quantity === 0){
+        addDish(dishData._id, dishData.quantity+1, dishData.price, dishData.dish,dishData.title, 0);
       }
-      else if(counter === 5){
+      else if(dishData.quantity === 5){
       }
       else{
-        addDish(dishData._id, counter+1, dishData.price, dishData.dish,dishData.title, 1);
+        addDish(dishData._id, dishData.quantity+1, dishData.price, dishData.dish,dishData.title, 1);
       }
     }
     function subNew(){
       
-      if (counter !== 0){
-        addDish(dishData._id, counter-1, dishData.price, dishData.dish,dishData.title, -1);
+      if (dishData.quantity !== 0){
+        addDish(dishData._id, dishData.quantity-1, dishData.price, dishData.dish,dishData.title, -1);
       }
       else{
-        addDish(dishData._id, counter, dishData.price, dishData.dish, dishData.title,-2);
+        addDish(dishData._id, dishData.quantity, dishData.price, dishData.dish, dishData.title,-2);
       }
     }
 
@@ -57,11 +60,11 @@ const MenuCard = ({dishData, addDish}) => {
           <p className="text-active underline">ALLERGIE</p>
           <p className="font-bold">{dishData.price} €</p>
           <div className="flex justify-between items-center gap-[1rem]">
-            <button onClick={() => setCounter(counter === 0 ? 0 : --counter)}>      
+            <button onClick={() => handleQty(dishData.quantity-1)}>      
               <img src={MinusIcon} alt="minus-icon" onClick={subNew}/>
             </button>
-            <p className="w-[1rem]">{counter}</p>
-            <button onClick={() => setCounter(counter >= MAX_COUNT ? counter : ++counter)}>
+            <p className="w-[1rem]">{dishData.quantity}</p>
+            <button onClick={() => handleQty(dishData.quantity +1)}>
               <img src={PlusIcon} alt="minus-icon" onClick ={addNew}/>
             </button>
           </div>

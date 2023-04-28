@@ -18,111 +18,117 @@ const Home = () => {
 
   const location = useLocation();
   const shopping = location.state;
+  const sections = ["degustazione", "nigiri", "zuppe", "insalate", "gyoza", "primi", "riso", "teppanyaki", "frittura", "tartare e sashimi", "temaki", "sushi gio", "gunkan", "onigiri"
+  ,"hosomaki", "tataki", "uramaki" , "hanami special roll", "futomaki", "maki fritto", "bowl", "sushi misto", "cena"];
 
-  const sections = ["degustazione", "nigiri", "zuppe", "insalate", "gyoza", "primi", "riso", "teppanyaki", "frittura", "tartare & sashimi", "temaki", "gio", "gunkan", "onigiri"
-  ,"hosomaki", "tataki", "uramaki" , "special roll", "futomaki", "maki fritto", "bowl", "sushi misto", "cena"];
-
+  const [shoppingState, setShoppingState] = useState(shopping??[]);
   const [curSection, setSection] = useState(sections[0]);
   const [menu, setMenu] = useState ([]);
   const [filteredMenu, setFilteredMenu] = useState ([]);
-  const [degustazione, setDegustazione] = useState ([]);
-
+  const [menuLoaded, setMenuLoaded] = useState (false);
+  let mappedMenu;
+  
   useEffect (() => {
-    return (async () => {
+
+    (async () => {
       let dishData;
       try{
-        const response = await fetch('http://localhost:5500/');
+        const response = await fetch('http://localhost:5500/menu');
         dishData = await response.json();
       } catch (error) {
         dishData = [];
       }
       setMenu(dishData);
-      console.log(shopping);
+
+    })();
+  },[]);
+
+  useEffect(()=>{
+    if (menu.length >0){
+      setMenuLoaded(true);
+    }
+  },  [menu])
+
+  useEffect(()=>{
+    if (menuLoaded){
+      const filteredDishes = menu.find(item => item[curSection] !== undefined)[curSection];
       if (shopping && (shopping).length != 0){
-        const shopping = location.state;
-        const mappedMenu = dishData.map(dish =>{
-          const matchingDish = shopping.find(dish2 => dish2._id === dish._id.$oid || dish2._id.$oid === dish._id.$oid);
+        const mappedMenu = filteredDishes.map(dish =>{
+          const matchingDish = shopping.find(dish2 => dish2._id === dish._id.$oid || dish2._id.$oid === dish._id.$oid || dish2._id.$oid === dish._id);
           if (matchingDish){
             return {...dish, quantity: matchingDish.qty};
           }
           return dish;
         });
-        console.log(mappedMenu);
-
-        const filteredMenu = mappedMenu.filter(nigiri =>nigiri.dish>76 && nigiri.dish < 88);
-        setFilteredMenu(filteredMenu);
-        const degustazione = mappedMenu.filter(degustazione => degustazione.dish<5);
-        setDegustazione (degustazione);
+        setFilteredMenu(mappedMenu);
       }
       else{
-        const mappedMenu = dishData;
-        const filteredMenu = mappedMenu.filter(nigiri =>nigiri.dish>76 && nigiri.dish < 88);
-        setFilteredMenu(filteredMenu);
-        const degustazione = mappedMenu.filter(degustazione => degustazione.dish<5);
-        setDegustazione (degustazione);
+        setFilteredMenu(filteredDishes);
       }
 
-      
-    });
-  }, []);
-  //implementazione del filtro per categoria
-  useEffect(()=>{
-  }, [curSection])
+    }
+
+  }, [menuLoaded,menu]);
+
+  useEffect (() =>{
+    if(menuLoaded){
+      const filteredDishes = menu.find(item => item[curSection] !== undefined)[curSection];
+        if (shopping && (shopping).length != 0){
+          const mappedMenu = filteredDishes.map(dish =>{
+            const matchingDish = shopping.find(dish2 => dish2._id === dish._id.$oid || dish2._id.$oid === dish._id.$oid || dish2._id.$oid === dish._id);
+            if (matchingDish){
+              return {...dish, quantity: matchingDish.qty};
+            }
+            return dish;
+          });
+          setFilteredMenu(mappedMenu);
+          
+        }
+        else{
+          setFilteredMenu(filteredDishes);
+        }
+    }
+  }, [curSection]);
+    
 
   //shopping cart state
-  const [shoppingState, setShoppingState] = useState(shopping??[]);
   function addDish(id, qty, price, dish, title, flag) {
+    let item ={
+      "_id": id,
+        "qty": qty,
+        "price": price,
+        "dish": dish,
+        "title": title
+    }
     if ( flag === 0 ){
-      const item = {
-        "_id": id,
-        "qty": qty,
-        "price": price,
-        "dish": dish,
-        "title": title
-      }
       setShoppingState([...shoppingState, item]);
-    }
-    else if( flag === 1 ){
-      const item ={
-        "_id": id,
-        "qty": qty,
-        "price": price,
-        "dish": dish,
-        "title": title
-      }
+    }  else if( flag === 1 ){
       const newObj = shoppingState.map(ogg =>{
-        if (ogg._id === item._id){
+        if (ogg._id === item._id|| ogg._id.$oid === item._id.$oid || ogg._id.$oid === item._id){
           return item;
         }
         return ogg;
-      })
-      setShoppingState(newObj);
-    }
-    else if(flag === -1){
-      const item = {
-        "_id": id,
-        "qty": qty,
-        "price": price,
-        "dish": dish,
-        "title": title
-      }
-      const newObj = shoppingState.map(ogg =>{
-        if (ogg._id === item._id){
-          return item;
-        }
-        return ogg;
-      })
-      setShoppingState(newObj);
-    }
 
-    else {  
+      })
+      setShoppingState(newObj);
+    }  else if(flag === -1){
+
+      const newObj = shoppingState.map(ogg =>{
+        if (ogg._id === item._id || ogg._id){
+          return item;
+        }
+        return ogg;
+      })
+      setShoppingState(newObj);
+
+    } else {  
       const updatedItems = shoppingState.filter(item => item._id !== id);
       setShoppingState(updatedItems)
     }
   }
 
   //calcolo del totale dei piatti e numero
-  const total =shoppingState.reduce((acc, item)=> acc + item.price, 0);
+  const total = shoppingState.reduce((acc, item)=> acc + item.price, 0);
   const plates = shoppingState.reduce((acc, item)=> acc + item.qty, 0);
   
   
@@ -146,14 +152,6 @@ const Home = () => {
     }
   }, 1000);
 
-  //questa parte va eliminata quando si implementa filteredMenu
-  let selected = [];
-  
-  if (curSection === "nigiri") {
-    selected = filteredMenu;
-  } else if (curSection === "degustazione") {
-    selected = degustazione;
-  } 
   return (
     <section>
       <header className="header">
@@ -185,7 +183,7 @@ const Home = () => {
         
         <ul className="overflow-y-scroll z-0">
            
-            {selected && selected.map((dish, index) =>
+            {filteredMenu && filteredMenu.map((dish, index) =>
               <li key ={index}>
                 <MenuCard dishData={dish} addDish={addDish}/>
               </li>

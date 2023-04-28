@@ -45,7 +45,7 @@ const ShoppingCart = () => {
             }
 
             const newObj = shoppingState.map(ogg =>{
-                if (ogg._id.$oid === item._id){
+                if (ogg._id.$oid === item._id || ogg._id.$oid === item._id.$oid || ogg._id.$oid === item._id){
                 return item;
                 }
                 return ogg;
