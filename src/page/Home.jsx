@@ -1,6 +1,6 @@
 // Importing libraries
 import React, { useContext, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 // Importing context
 import { ShoppingContext } from "../context/ShoppingContext";
@@ -11,7 +11,6 @@ import MenuCard from "../components/MenuCard";
 
 // Importing images
 import Logo from "../images/logo.svg";
-
 
 // Importing icons
 // import ShoppingCartIcon from "../images/icons/shopping-cart.svg";
@@ -37,6 +36,8 @@ const Home = () => {
   //     setLabel("00:00");
   //   }
   // }, 1000);
+
+  const location = useLocation();
 
   const [shoppingState, setShoppingState] = useContext(ShoppingContext);
   const { data, totalPrice, totalCount } = shoppingState;
@@ -90,10 +91,20 @@ const Home = () => {
         setFilteredMenu(data[curCategory][curSection]);
         setIsLoaded(true);
       } catch (error) {
+        console.log(filteredMenu);
         data = [];
       }
       setMenu(data);
     })();
+  }, []);
+
+  useEffect(() => {
+    // for (const item of filteredMenu) {
+    //   const matchingDish = data.find((obj) => obj.dish === item.dish);
+    //   if (matchingDish) {
+    //     item.quantity = matchingDish.quantity;
+    //   }
+    // }
   }, []);
 
   // Category handling
@@ -116,16 +127,17 @@ const Home = () => {
         }
       }
     }
-  }
+  };
 
   // Section handling
   const handleChangeSection = (section) => {
     setSection(section);
     if (menu) {
-      if (curCategory === "dishes" || curCategory === "wines") setFilteredMenu(menu[curCategory][section]);
+      if (curCategory === "dishes" || curCategory === "wines")
+        setFilteredMenu(menu[curCategory][section]);
       else setFilteredMenu(menu[curCategory] ?? []);
     }
-  }
+  };
 
   return (
     <section>
@@ -189,20 +201,22 @@ const Home = () => {
         <ul className="overflow-y-scroll">
           {filteredMenu.map((dish, index) => (
             <li key={index}>
-                <MenuCard dishData={dish} />
+              <MenuCard dishData={dish} />
             </li>
           ))}
         </ul>
       )}
 
-    <Link to="/shopping-cart">
-      <button className="fixed z-10 w-full h-[5rem] left-[50%] bottom-0 -translate-x-[50%] px-auto py-[0.5rem] text-[#000] uppercase font-medium rounded-full gradient">
-        <span className="text-[#000]">€ {totalPrice} ({totalCount}/5 piatti)</span>
-        <p className="text-[#000] uppercase font-semibold">
-          procedi all'ordine
-        </p>
-      </button>
-    </Link>
+      <Link to="/shopping-cart">
+        <button className="fixed z-10 w-full h-[5rem] left-[50%] bottom-0 -translate-x-[50%] px-auto py-[0.5rem] text-[#000] uppercase font-medium rounded-full gradient">
+          <span className="text-[#000]">
+            € {totalPrice} ({totalCount}/5 piatti)
+          </span>
+          <p className="text-[#000] uppercase font-semibold">
+            procedi all'ordine
+          </p>
+        </button>
+      </Link>
     </section>
   );
 };
