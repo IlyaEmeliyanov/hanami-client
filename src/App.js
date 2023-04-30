@@ -13,7 +13,7 @@ import ShoppingCart from './page/ShoppingCart';
 import { ShoppingContext } from './context/ShoppingContext';
 
 function App() {
-  const [shoppingState, setShoppingState] = useState([]);
+  const [shoppingState, setShoppingState] = useState({data: [], totalPrice: 0, totalCount: 0});
 
   return (
     <ShoppingContext.Provider value={[shoppingState, setShoppingState]}>

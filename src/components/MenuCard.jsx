@@ -1,6 +1,9 @@
 // Importing libraries
 import React, { useContext, useEffect, useState } from "react";
 
+// Importing context
+import { ShoppingContext } from "../context/ShoppingContext";
+
 // Importing components
 import Spacer from "./common/Spacer";
 
@@ -8,45 +11,52 @@ import Spacer from "./common/Spacer";
 import MinusIcon from "../images/icons/minus.svg";
 import PlusIcon from "../images/icons/plus.svg";
 
-import { ShoppingContext } from "../context/ShoppingContext";
-
 const MenuCard = ({ dishData }) => {
   const [shoppingState, setShoppingState] = useContext(ShoppingContext);
+  let {data, totalPrice, totalCount} = shoppingState;
 
   const { title, description, dish, pieces, quantity, price } = dishData;
 
-  const MAX_COUNT = 5;
-
   let [counter, setCounter] = useState(0);
 
-  const addData = () => {
-    setCounter(counter >= MAX_COUNT ? counter : ++counter); // increment counter of single card
-    const item = shoppingState.find(item => item.dish === dish); // find the element in the global context
+  const MAX_COUNT = 5;
 
-    if (item) { // if present in the state then update the quantity
-      item.quantity = counter;
-    } else { // otherwise push it to the global context
-      shoppingState.push({
-        title, description, dish, pieces, quantity: counter, price
-      });
+  const addData = () => {
+    if (totalCount < MAX_COUNT) {
+      totalCount++; // ! update immediatly totalCount, otherwise no order will be added
+      setCounter(counter <= totalCount ? ++counter : counter); // increment counter of single card
+  
+      const item = data.find(item => item.dish === dish); // find the element in the global context
+  
+      if (counter <= totalCount && totalCount <= MAX_COUNT) {
+        if (item) { // if present in the state then update the quantity
+          item.quantity = counter;
+          totalPrice += item.price;
+        } else { // otherwise push it to the global context
+          data.push({
+            title, description, dish, pieces, quantity: counter, price
+          });
+          totalPrice += price;
+        }
+      }
+      setShoppingState({data, totalPrice, totalCount}); // update the state
     }
-    setShoppingState(shoppingState); // update the state
-    console.log(shoppingState)
   }
 
   const removeData = () => {
     setCounter(counter === 0 ? 0 : --counter); // decrement counter of single card
-    const item = shoppingState.find(item => item.dish === dish); // find the element in the global context
+    const item = data.find(item => item.dish === dish); // find the element in the global context
 
     if (item) { // if present in the state then update the quantity
+      totalPrice -= item.price;
+      totalCount--;
       if (counter === 0) { // if counter set to 0 then remove the element from the global context
-        shoppingState.splice(shoppingState.indexOf(item), 1);
+        data.splice(data.indexOf(item), 1);
       } else { // otherwise update the quantity
         item.quantity = counter;
       }
     }
-    setShoppingState(shoppingState); // update the state
-    console.log(shoppingState)
+    setShoppingState({data, totalPrice, totalCount}); // update the state
   }
 
   return (

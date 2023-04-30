@@ -1,5 +1,9 @@
 // Importing libraries
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+
+// Importing context
+import { ShoppingContext } from "../context/ShoppingContext";
 
 // Importing components
 import Spacer from "../components/common/Spacer";
@@ -8,9 +12,10 @@ import MenuCard from "../components/MenuCard";
 // Importing images
 import Logo from "../images/logo.svg";
 
+
 // Importing icons
-import ShoppingCartIcon from "../images/icons/shopping-cart.svg";
-import SearchIcon from "../images/icons/search.svg";
+// import ShoppingCartIcon from "../images/icons/shopping-cart.svg";
+// import SearchIcon from "../images/icons/search.svg";
 
 const Home = () => {
   const getLabel = (seconds) =>
@@ -33,7 +38,8 @@ const Home = () => {
   //   }
   // }, 1000);
 
-  // dishes, drinks, wines, desserts
+  const [shoppingState, setShoppingState] = useContext(ShoppingContext);
+  const { data, totalPrice, totalCount } = shoppingState;
 
   const categories = ["dishes", "wines", "drinks", "desserts"];
 
@@ -75,13 +81,6 @@ const Home = () => {
   const [curSection, setSection] = useState(sections[0]);
   const [filteredMenu, setFilteredMenu] = useState();
 
-  const [totalCount, setTotalCount] = useState(0);
-
-  const [dishes, setDishes] = useState([]);
-  const [wines, setWines] = useState([]);
-  const [drinks, setDrinks] = useState([]);
-  const [desserts, setDesserts] = useState([]);
-
   useEffect(() => {
     (async () => {
       let data;
@@ -97,30 +96,36 @@ const Home = () => {
     })();
   }, []);
 
-  useEffect(() => {
+  // Category handling
+  const handleChangeCategory = (category) => {
+    setCategory(category);
     if (menu) {
-      if (curCategory === "dishes") {
+      if (category === "dishes") {
         setSections(dishesSections);
-        setSection(sections[0]);
-        setFilteredMenu(menu[curCategory][curSection] ?? []);
-      } else if (curCategory == "wines") {
+        setSection(dishesSections[0]);
+        setFilteredMenu(menu[category][dishesSections[0]] ?? []);
+      } else if (category === "wines") {
         setSections(winesSections);
-        setSection(sections[0]);
-        setFilteredMenu(menu[curCategory][curSection] ?? []);
+        setSection(winesSections[0]);
+        setFilteredMenu(menu[category][winesSections[0]] ?? []);
       } else {
         setSections([]);
-        setFilteredMenu(menu[curCategory] ?? []);
+        if (menu[category]) {
+          setFilteredMenu([]);
+          // setFilteredMenu(menu[category] ?? []); // ? Uncomment this line when the drinks and desserts will be an array
+        }
       }
     }
-  }, [curCategory]);
+  }
 
-  useEffect(() => {
+  // Section handling
+  const handleChangeSection = (section) => {
+    setSection(section);
     if (menu) {
-      if ((curCategory == "dishes") | "wines")
-        setFilteredMenu(menu[curCategory][curSection]);
+      if (curCategory === "dishes" || curCategory === "wines") setFilteredMenu(menu[curCategory][section]);
       else setFilteredMenu(menu[curCategory] ?? []);
     }
-  }, [curSection]);
+  }
 
   return (
     <section>
@@ -146,7 +151,7 @@ const Home = () => {
           {categories.map((category, index) => (
             <li
               key={index}
-              onClick={() => setCategory(category)}
+              onClick={() => handleChangeCategory(category)}
               className="px-[1.5rem] py-[10px]"
             >
               <h3
@@ -165,7 +170,7 @@ const Home = () => {
           {sections.map((section, index) => (
             <li
               key={index}
-              onClick={() => setSection(section)}
+              onClick={() => handleChangeSection(section)}
               className="px-[1.5rem] py-[10px]"
             >
               <p
@@ -190,12 +195,14 @@ const Home = () => {
         </ul>
       )}
 
+    <Link to="/shopping-cart">
       <button className="fixed z-10 w-full h-[5rem] left-[50%] bottom-0 -translate-x-[50%] px-auto py-[0.5rem] text-[#000] uppercase font-medium rounded-full gradient">
-        <span className="text-[#000]">€ 28,00 (2/5 piatti)</span>
+        <span className="text-[#000]">€ {totalPrice} ({totalCount}/5 piatti)</span>
         <p className="text-[#000] uppercase font-semibold">
           procedi all'ordine
         </p>
       </button>
+    </Link>
     </section>
   );
 };
