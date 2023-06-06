@@ -121,7 +121,8 @@ const Home = () => {
         });
         const data = await response.json();
         const counter = data.counter;
-        console.log("RICHIESTA: ", counter)
+        console.log("RICHIESTA: ", counter);
+        if (counter <0) {counter =0}
         setTimer(counter);
       } catch (error) {
         console.error('Errore nella richiesta del timer', error);
